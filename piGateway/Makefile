@@ -3,18 +3,18 @@ COMMON_INCLUDE_DIRS    := ../Common/include
 COMMON_INCLUDES        := ../Common/include/RFM69HomeAutomationCfg.h ../Common/include/RFM69NetworkCfg.h ../Common/include/rfm69/rfm69.h ../Common/include/rfm69/rfm69registers.h
 COMMON_SOURCES         := ../Common/source/rfm69/rfm69.cpp
 COMMON_LIBS            := wiringPi
-COMMON_DEFINES         := RASPBERRY
+COMMON_DEFINES         := -D'RASPBERRY' -D'RF69_SPI_SELECT=0' -D'RF69_IRQ=0'
 
 GATEWAY_SOURCES        := Gateway.cpp $(COMMON_SOURCES)
 SENDERRECEIVER_SOURCES := SenderReceiver.cpp $(COMMON_SOURCES)
 
 GATEWAY_LIBS           := mosquitto
 
-GATEWAY_DAEMON_DEFINES := DAEMON
+GATEWAY_DAEMON_DEFINES := -D'DAEMON'
 
 CC                      = g++
-CFLAGS                  = -std=c++11 -o $@ -I$(COMMON_INCLUDE_DIRS) -l$(COMMON_LIBS) -D$(COMMON_DEFINES) -Wall
-#CFLAGS                  = -std=c++11 -E -I$(COMMON_INCLUDE_DIRS) -l$(COMMON_LIBS) -D$(COMMON_DEFINES) -Wall
+CFLAGS                  = -std=c++11 -o $@ -I$(COMMON_INCLUDE_DIRS) -l$(COMMON_LIBS) $(COMMON_DEFINES) -Wall
+#CFLAGS                  = -std=c++11 -E -I$(COMMON_INCLUDE_DIRS) -l$(COMMON_LIBS) $(COMMON_DEFINES) -Wall
 
 
 systemd-install : Gatewayd
@@ -34,7 +34,7 @@ systemd-uninstall:
 
 
 Gatewayd : $(GATEWAY_SOURCES) $(COMMON_INCLUDES)
-	$(CC) $(GATEWAY_SOURCES) $(CFLAGS) -l$(GATEWAY_LIBS) -D$(GATEWAY_DAEMON_DEFINES)
+	$(CC) $(GATEWAY_SOURCES) $(CFLAGS) -l$(GATEWAY_LIBS) $(GATEWAY_DAEMON_DEFINES)
 
 Gateway  : $(GATEWAY_SOURCES) $(COMMON_INCLUDES)
 	$(CC) $(GATEWAY_SOURCES) $(CFLAGS) -l$(GATEWAY_LIBS)

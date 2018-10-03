@@ -55,6 +55,8 @@
   <avrgcc.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=1000000L</Value>
   <Value>NO_SERIAL_OUTPUT</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
+  <Value>RF69_IRQ=PCINT4</Value>
   <Value>NDEBUG</Value>
 </ListValues></avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths><ListValues><Value>../../../Common/include</Value><Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.172\include</Value><Value>../ArduinoCore/include/variants/tinyX5</Value><Value>../ArduinoCore/include/core</Value></ListValues></avrgcc.compiler.directories.IncludePaths>
@@ -68,6 +70,8 @@
   <avrgcccpp.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=1000000L</Value>
   <Value>NO_SERIAL_OUTPUT</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
+  <Value>RF69_IRQ=PCINT4</Value>
   <Value>NDEBUG</Value>
 </ListValues></avrgcccpp.compiler.symbols.DefSymbols>
   <avrgcccpp.compiler.directories.IncludePaths><ListValues><Value>../../../Common/include</Value><Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.172\include</Value><Value>../ArduinoCore/include/variants/tinyX5</Value><Value>../ArduinoCore/include/core</Value></ListValues></avrgcccpp.compiler.directories.IncludePaths>
@@ -97,17 +101,11 @@
   <avrgcc.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=1000000L</Value>
   <Value>NO_SERIAL_OUTPUT</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
+  <Value>RF69_IRQ=PCINT4</Value>
   <Value>DEBUG</Value>
 </ListValues></avrgcc.compiler.symbols.DefSymbols>
-  <avrgcc.compiler.directories.IncludePaths><ListValues>
-  <Value>../../../Common/include</Value>
-  <Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.172\include</Value>
-  <Value>../ArduinoCore/include/variants/tinyX5</Value>
-  <Value>../ArduinoCore/include/core</Value>
-  <Value>../../ArduinoCore-ATtiny85/include/variants/tinyX5</Value>
-  <Value>../../ArduinoCore-ATtiny85/include/core</Value>
-  <Value>..\include\variants\tinyX5</Value>
-</ListValues></avrgcc.compiler.directories.IncludePaths>
+  <avrgcc.compiler.directories.IncludePaths><ListValues><Value>../../../Common/include</Value><Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.172\include</Value><Value>../ArduinoCore/include/variants/tinyX5</Value><Value>../ArduinoCore/include/core</Value></ListValues></avrgcc.compiler.directories.IncludePaths>
   <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
   <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
@@ -118,17 +116,11 @@
   <avrgcccpp.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=1000000L</Value>
   <Value>NO_SERIAL_OUTPUT</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
+  <Value>RF69_IRQ=PCINT4</Value>
   <Value>DEBUG</Value>
 </ListValues></avrgcccpp.compiler.symbols.DefSymbols>
-  <avrgcccpp.compiler.directories.IncludePaths><ListValues>
-  <Value>../../../Common/include</Value>
-  <Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.172\include</Value>
-  <Value>../ArduinoCore/include/variants/tinyX5</Value>
-  <Value>../ArduinoCore/include/core</Value>
-  <Value>../../ArduinoCore-ATtiny85/include/variants/tinyX5</Value>
-  <Value>../../ArduinoCore-ATtiny85/include/core</Value>
-  <Value>..\include\variants\tinyX5</Value>
-</ListValues></avrgcccpp.compiler.directories.IncludePaths>
+  <avrgcccpp.compiler.directories.IncludePaths><ListValues><Value>../../../Common/include</Value><Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.172\include</Value><Value>../ArduinoCore/include/variants/tinyX5</Value><Value>../ArduinoCore/include/core</Value></ListValues></avrgcccpp.compiler.directories.IncludePaths>
   <avrgcccpp.compiler.optimization.PackStructureMembers>True</avrgcccpp.compiler.optimization.PackStructureMembers>
   <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcccpp.compiler.warnings.AllWarnings>True</avrgcccpp.compiler.warnings.AllWarnings>

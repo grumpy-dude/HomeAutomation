@@ -44,6 +44,8 @@ Adjust network configuration to your setup in the file networkconfig.h
 
 //general --------------------------------
 
+//#define DEBUG
+
 #ifdef DAEMON
 	#define LOG(...) do { syslog(LOG_INFO, __VA_ARGS__); } while (false)
 	#define LOG_E(...) do { syslog(LOG_ERR, __VA_ARGS__); } while (false)
@@ -333,68 +335,60 @@ static int runLoop( void )
 	
 			LOG("[%03d] to [%03d] ", the_node_id, target_id);
 
-			if( data_length != sizeof(Packet_Data) )
+			the_RFM69_Packet = *(Packet_Data*)data; //assume radio.DATA actually contains our struct and not something else
+
+			switch( the_RFM69_Packet.protocol_Version )
 			{
-				LOG( "Invalid payload received, not matching Payload struct! %d - %d\r\n", data_length, sizeof(Packet_Data) );
-				hexDump( "", data, data_length, Desired_Data_Vals_Per_Line );		
+				case First_Protocol_Version:
+					{
+						switch( the_RFM69_Packet.data_Type )
+						{
+							case Temperature_Data_Type:
+								{
+									LOG( "Received Temperature, Node ID = %03d Device ID = %03d Seq = %03d  RSSI = %+04d Temp = %+07.2fC\n",
+										the_RFM69_Packet.source_Node_ID,
+										the_RFM69_Packet.the_Data.temperature.device_ID,
+										the_RFM69_Packet.the_Data.temperature.packet_Sequence_Number,
+										rx_signal_strength,
+										the_RFM69_Packet.the_Data.temperature.temperature
+									);
+									
+									
+									mqttFormOutputTopic    ( the_RFM69_Packet.source_Node_ID, the_RFM69_Packet.the_Data.temperature.device_ID, "RSSI", mqtt_topic );
+									sprintf                ( mqtt_message, "%+04d", rx_signal_strength );
+									mosquittoPublishMessage( mqtt_topic, mqtt_message );
+
+									mqttFormOutputTopic    ( the_RFM69_Packet.source_Node_ID, the_RFM69_Packet.the_Data.temperature.device_ID, "Sequence", mqtt_topic );
+									sprintf                ( mqtt_message, "%03d", the_RFM69_Packet.the_Data.temperature.packet_Sequence_Number );
+									mosquittoPublishMessage( mqtt_topic, mqtt_message );
+
+									mqttFormOutputTopic    ( the_RFM69_Packet.source_Node_ID, the_RFM69_Packet.the_Data.temperature.device_ID, "TemperatureC", mqtt_topic );
+									sprintf                ( mqtt_message, "%+07.2f", the_RFM69_Packet.the_Data.temperature.temperature );
+									mosquittoPublishMessage( mqtt_topic, mqtt_message );
+
+									published_mqtt_message = true;
+									break;
+								}
+								
+							default:
+								{
+									LOG( "Unhandled Data Type = %03d\n", the_RFM69_Packet.data_Type );
+									break;
+								}
+						}
+								
+						break;
+					}
+					
+				default:
+					{
+						LOG( "Unhandled Protocol Version = %03d\n", the_RFM69_Packet.protocol_Version );
+						break;
+					}
 			}
-			else
-			{
-				the_RFM69_Packet = *(Packet_Data*)data; //assume radio.DATA actually contains our struct and not something else
 
-				switch( the_RFM69_Packet.protocol_Version )
-				{
-					case First_Protocol_Version:
-						{
-							switch( the_RFM69_Packet.data_Type )
-							{
-								case Temperature_Data_Type:
-									{
-										LOG( "Received Temperature, Node ID = %03d Device ID = %03d Seq = %03d  RSSI = %+04d Temp = %+07.2fC\n",
-											the_RFM69_Packet.source_Node_ID,
-											the_RFM69_Packet.the_Data.temperature.device_ID,
-											the_RFM69_Packet.the_Data.temperature.packet_Sequence_Number,
-											rx_signal_strength,
-											the_RFM69_Packet.the_Data.temperature.temperature
-										);
-										
-                                        
-										mqttFormOutputTopic    ( the_RFM69_Packet.source_Node_ID, the_RFM69_Packet.the_Data.temperature.device_ID, "RSSI", mqtt_topic );
-                                        sprintf                ( mqtt_message, "%+04d", rx_signal_strength );
-                                        mosquittoPublishMessage( mqtt_topic, mqtt_message );
-
-										mqttFormOutputTopic    ( the_RFM69_Packet.source_Node_ID, the_RFM69_Packet.the_Data.temperature.device_ID, "Sequence", mqtt_topic );
-                                        sprintf                ( mqtt_message, "%03d", the_RFM69_Packet.the_Data.temperature.packet_Sequence_Number );
-                                        mosquittoPublishMessage( mqtt_topic, mqtt_message );
-
-                                        mqttFormOutputTopic    ( the_RFM69_Packet.source_Node_ID, the_RFM69_Packet.the_Data.temperature.device_ID, "TemperatureC", mqtt_topic );
-                                        sprintf                ( mqtt_message, "%+07.2f", the_RFM69_Packet.the_Data.temperature.temperature );
-                                        mosquittoPublishMessage( mqtt_topic, mqtt_message );
-
-										published_mqtt_message = true;
-										break;
-									}
-									
-								default:
-									{
-										LOG( "Unhandled Data Type = %03d\n", the_RFM69_Packet.data_Type );
-										break;
-									}
-							}
-									
-							break;
-						}
-						
-					default:
-						{
-							LOG( "Unhandled Protocol Version = %03d\n", the_RFM69_Packet.protocol_Version );
-							break;
-						}
-				}
-
-				if( published_mqtt_message == false )
-					hexDump( NULL, data, data_length, Desired_Data_Vals_Per_Line );
-			} // end if data_length 
+			if( published_mqtt_message == false )
+				hexDump( NULL, data, data_length, Desired_Data_Vals_Per_Line );
 		} //end if radio.receive
 
 
@@ -439,7 +433,7 @@ static int runLoop( void )
 
 static void initRFM69( void )
 {
-	the_RFM69->restart( Frequency_Band, The_Gateway_Node_ID, The_Network_ID );
+	the_RFM69->initialize( Frequency_Band, The_Gateway_Node_ID, The_Network_ID );
     
     #if defined (THIS_RFM69_IS_HIGH_POWER)
 		the_RFM69->setHighPower();
@@ -481,9 +475,9 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 
     unsigned char hexbuf[(Max_Data_Vals_Per_Line * 3) + 1];	// Data as hex values (2 char + 1 space)
 	unsigned char ascbuf[Max_Data_Vals_Per_Line + 1];	    // Data as ASCII characters
-	unsigned int  num_data_vals_this_line;
 
-	unsigned int  num_lines    = 0;
+	unsigned int  num_data_vals_this_line = data_len_remaining;
+	unsigned int  num_lines    			  = 0;
 	
 
 	// nothing to output
@@ -493,7 +487,7 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 	// Limit the line length to Max
 	if( num_data_vals_per_line > Max_Data_Vals_Per_Line ) 
 		num_data_vals_per_line = Max_Data_Vals_Per_Line;
-		
+
 	// Output description if given.
     if( desc != NULL )
 		LOG( "%s:\n", desc );
@@ -503,8 +497,10 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 		unsigned int hexbuf_index = 0;
 		unsigned int ascbuf_index = 0;
 
-		num_data_vals_this_line = data_len_remaining - num_data_vals_per_line;
-		if( num_data_vals_this_line > num_data_vals_per_line )
+
+		if( data_len_remaining < num_data_vals_per_line )
+			num_data_vals_this_line = data_len_remaining;
+		else
 			num_data_vals_this_line = num_data_vals_per_line;
 
 		data_len_remaining -= num_data_vals_this_line;
@@ -533,7 +529,7 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 		ascbuf[ascbuf_index] = '\0';
 	
 		// output buffers
-		LOG("%04x: %s   %s\n", num_lines, hexbuf, ascbuf);
+		LOG("%04x: %s   %s\n", (num_lines * num_data_vals_per_line), hexbuf, ascbuf);
 		
 		num_lines++;
 	} while( data_len_remaining > 0 );

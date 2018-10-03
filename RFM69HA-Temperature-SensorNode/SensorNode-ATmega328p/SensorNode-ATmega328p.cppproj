@@ -20,10 +20,10 @@
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
     <ProgFlashFromRam>true</ProgFlashFromRam>
-    <RamSnippetAddress />
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
     <UncachedRange />
     <preserveEEPROM>true</preserveEEPROM>
-    <OverrideVtorValue />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
     <BootSegment>2</BootSegment>
     <ResetRule>0</ResetRule>
     <eraseonlaunchrule>0</eraseonlaunchrule>
@@ -54,6 +54,8 @@
   <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
   <avrgcc.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=16000000L</Value>
+  <Value>RF69_IRQ=PCINT18</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
   <Value>NDEBUG</Value>
 </ListValues></avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths><ListValues><Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.2.209\include</Value><Value>../../../Common/include</Value><Value>../ArduinoCore/include/core</Value><Value>../ArduinoCore/include/variants/standard</Value></ListValues></avrgcc.compiler.directories.IncludePaths>
@@ -66,6 +68,8 @@
   <avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>
   <avrgcccpp.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=16000000L</Value>
+  <Value>RF69_IRQ=PCINT18</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
   <Value>NDEBUG</Value>
 </ListValues></avrgcccpp.compiler.symbols.DefSymbols>
   <avrgcccpp.compiler.directories.IncludePaths><ListValues><Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.2.209\include</Value><Value>../../../Common/include</Value><Value>../ArduinoCore/include/core</Value><Value>../ArduinoCore/include/variants/standard</Value></ListValues></avrgcccpp.compiler.directories.IncludePaths>
@@ -93,6 +97,8 @@
   <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
   <avrgcc.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=16000000L</Value>
+  <Value>RF69_IRQ=PCINT18</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
   <Value>DEBUG</Value>
 </ListValues></avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths><ListValues><Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.2.209\include</Value><Value>../../../Common/include</Value><Value>../ArduinoCore/include/core</Value><Value>../ArduinoCore/include/variants/standard</Value></ListValues></avrgcc.compiler.directories.IncludePaths>
@@ -105,6 +111,8 @@
   <avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>
   <avrgcccpp.compiler.symbols.DefSymbols><ListValues>
   <Value>F_CPU=16000000L</Value>
+  <Value>RF69_IRQ=PCINT18</Value>
+  <Value>RF69_SPI_SELECT=SS</Value>
   <Value>DEBUG</Value>
 </ListValues></avrgcccpp.compiler.symbols.DefSymbols>
   <avrgcccpp.compiler.directories.IncludePaths><ListValues><Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.2.209\include</Value><Value>../../../Common/include</Value><Value>../ArduinoCore/include/core</Value><Value>../ArduinoCore/include/variants/standard</Value></ListValues></avrgcccpp.compiler.directories.IncludePaths>

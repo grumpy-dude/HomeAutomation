@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
 	the_RFM69->initialize( Frequency_Band, The_Gateway_Node_ID, The_Network_ID );
 	initRFM69();
 	
-	LOG("setup complete\n");
+	LOG("setup complete\n\n");
 	return run_loop();
 }
 
@@ -119,64 +119,56 @@ static int run_loop() {
 //		if (mode == receiver && the_RFM69->receiveDone())
 		if (the_RFM69->receiveDone())
 		{
-			LOG("Received something...\n");
 //			blinkLED( The_Rx_LED_Pin );
+
 			// store the received data localy, so they can be overwited
 			// This will allow to send ACK immediately after
-			uint8_t data[RF69_MAX_DATA_LEN]; // recv/xmit buf, including header & crc bytes
 			uint8_t dataLength = the_RFM69->DATALEN;
-			memcpy(data, (void *)the_RFM69->DATA, dataLength);
-#if defined (DEBUG)
-			uint8_t theNodeID = the_RFM69->SENDERID;
-#endif			
-			uint8_t targetID = the_RFM69->TARGETID; // should match _address
-//			uint8_t PAYLOADLEN = the_RFM69->PAYLOADLEN;
+			uint8_t data[RF69_MAX_DATA_LEN]; // recv/xmit buf, including header & crc bytes
+			memcpy( data, (void *)the_RFM69->DATA, dataLength );
+
+			uint8_t theNodeID     = the_RFM69->SENDERID;
+			uint8_t targetID      = the_RFM69->TARGETID; // should match _address
+//			uint8_t PAYLOADLEN    = the_RFM69->PAYLOADLEN;
 			uint8_t ACK_REQUESTED = the_RFM69->ACK_REQUESTED;
-//			uint8_t ACK_RECEIVED = the_RFM69->ACK_RECEIVED; // should be polled immediately after sending a packet with ACK request
-#if defined (DEBUG)
-			int16_t RSSI = the_RFM69->RSSI; // most accurate RSSI during reception (closest to the reception)
-#endif
-			LOG("ACK REQUESTED: %d, targetID %d, theConfig.nodeId %d\n", ACK_REQUESTED, targetID, The_Gateway_Node_ID);
-			if (ACK_REQUESTED  && targetID == The_Gateway_Node_ID)
+//			uint8_t ACK_RECEIVED  = the_RFM69->ACK_RECEIVED; // should be polled immediately after sending a packet with ACK request
+			int16_t RSSI          = the_RFM69->RSSI; // most accurate RSSI during reception (closest to the reception)
+
+			LOG( "Received something... [%d] to [%d]\n", theNodeID, targetID );
+
+			if( ACK_REQUESTED  && targetID == The_Gateway_Node_ID )
 			{
 				// When a node requests an ACK, respond to the ACK
 				// but only if the Node ID is correct
 				the_RFM69->sendACK();
-//				blinkLED( The_Tx_LED_Pin );
 			}//end if radio.ACK_REQESTED
+			LOG( "ACK REQUESTED?: %c, target ID=%d, Gateway Id=%d\n", ((ACK_REQUESTED==0) ? 'N' : 'Y'), targetID, The_Gateway_Node_ID);
 	
-			LOG("[%d] to [%d] ", theNodeID, targetID);
+			hexDump( NULL, data, dataLength, Desired_Data_Vals_Per_Line );
 
-			if (dataLength != sizeof(Packet_Data))
+			the_RFM69_Packet = *(Packet_Data *)data; //assume radio.DATA actually contains our struct and not something else
+
+			LOG( "Received: RSSI=%+04ddbM - Protocol Version=%03u - Source Node ID=%03u - Target Node ID=%03u - Data Type=%03u\n",
+				RSSI,
+				the_RFM69_Packet.protocol_Version, the_RFM69_Packet.source_Node_ID, the_RFM69_Packet.target_Node_ID, the_RFM69_Packet.data_Type );
+
+			switch( the_RFM69_Packet.data_Type )
 			{
-				LOG("Invalid payload received, not matching Payload struct! %d - %d\r\n", dataLength, sizeof(Packet_Data));
-				hexDump( NULL, data, dataLength, Desired_Data_Vals_Per_Line );		
-			} else
-			{
-				the_RFM69_Packet = *(Packet_Data*)data; //assume radio.DATA actually contains our struct and not something else
+				case Test_Packet_Data_Type:
+					LOG("  Test packet--> Sequence Number=%03d\n\n", the_RFM69_Packet.the_Data.test_Packet.packet_Sequence_Number);
+					break;
 
-				LOG("Received: Source Node ID=%03u - RSSI=%+04d - Data Type=%03u\n",
-					the_RFM69_Packet.source_Node_ID,
-					RSSI,
-					the_RFM69_Packet.data_Type
-				);
+				case Temperature_Data_Type:
+					LOG("  Temperature packet--> Device ID=%03u - Sequence Number=%03d - Temperature=%+07.2f\n\n", the_RFM69_Packet.the_Data.temperature.device_ID,
+						the_RFM69_Packet.the_Data.temperature.packet_Sequence_Number, the_RFM69_Packet.the_Data.temperature.temperature);
+					break;
 
-				switch( the_RFM69_Packet.data_Type )
-				{
-					case Test_Packet_Data_Type:
-						LOG( "  Test packet> Sequence Number=%03d\n\n", the_RFM69_Packet.the_Data.test_Packet.packet_Sequence_Number );
-						break;
+				default:
+					LOG("  *** Unknown packet data type ***\n\n");
+					break;
+			}
 
-						case Temperature_Data_Type:
-						LOG( "  Temperature packet> Device ID=%03u - Sequence Number=%03d - Temperature=%+07.2f\n\n", the_RFM69_Packet.the_Data.temperature.device_ID,
-						        the_RFM69_Packet.the_Data.temperature.packet_Sequence_Number, the_RFM69_Packet.the_Data.temperature.temperature );
-						break;
-
-					default:
-						LOG( "  **Unknown packet data type**\n\n" );
-						break;
-				}
-			}  
+			LOG( "\n" );
 		} //end if radio.receive
 		
 	if (mode == sender)
@@ -197,7 +189,7 @@ static int run_loop() {
 
 static void initRFM69( void )
 {
-	the_RFM69->restart( Frequency_Band, The_Gateway_Node_ID, The_Network_ID );
+	the_RFM69->initialize( Frequency_Band, The_Gateway_Node_ID, The_Network_ID );
     
     #if defined (THIS_RFM69_IS_HIGH_POWER)
 		the_RFM69->setHighPower();
@@ -230,9 +222,9 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 
     unsigned char hexbuf[(Max_Data_Vals_Per_Line * 3) + 1];	// Data as hex values (2 char + 1 space)
 	unsigned char ascbuf[Max_Data_Vals_Per_Line + 1];	    // Data as ASCII characters
-	unsigned int  num_data_vals_this_line;
 
-	unsigned int  num_lines    = 0;
+	unsigned int  num_data_vals_this_line = data_len_remaining;
+	unsigned int  num_lines    			  = 0;
 	
 
 	// nothing to output
@@ -242,7 +234,7 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 	// Limit the line length to Max
 	if( num_data_vals_per_line > Max_Data_Vals_Per_Line ) 
 		num_data_vals_per_line = Max_Data_Vals_Per_Line;
-		
+
 	// Output description if given.
     if( desc != NULL )
 		LOG( "%s:\n", desc );
@@ -252,8 +244,10 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 		unsigned int hexbuf_index = 0;
 		unsigned int ascbuf_index = 0;
 
-		num_data_vals_this_line = data_len_remaining - num_data_vals_per_line;
-		if( num_data_vals_this_line > num_data_vals_per_line )
+
+		if( data_len_remaining < num_data_vals_per_line )
+			num_data_vals_this_line = data_len_remaining;
+		else
 			num_data_vals_this_line = num_data_vals_per_line;
 
 		data_len_remaining -= num_data_vals_this_line;
@@ -282,7 +276,7 @@ static void hexDump( const char* desc, void* data_addr, unsigned int data_len_re
 		ascbuf[ascbuf_index] = '\0';
 	
 		// output buffers
-		LOG("%04x: %s   %s\n", num_lines, hexbuf, ascbuf);
+		LOG("%04x: %s   %s\n", (num_lines * num_data_vals_per_line), hexbuf, ascbuf);
 		
 		num_lines++;
 	} while( data_len_remaining > 0 );
